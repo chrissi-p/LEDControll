@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="de.cp.ledcontroll.MainActivity"
+    tools:showIn="@layout/app_bar_main">
+
+    <TextView
+        android:id="@+id/tv_wifiState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="180dp"
+        android:text="@string/tv_wifiState"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_wifiState"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btn_wifiState" />
+
+    <Button
+        android:id="@+id/btn_wifiState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="wifiBtnClicked"
+        android:text="@string/btn_wifiState"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:layout_marginLeft="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/btn_wifiConnection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_wifiConnection"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:layout_marginLeft="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/btn_wifiState" />
+
+    <TextView
+        android:id="@+id/tv_wifiConnection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="180dp"
+        android:text="@string/tv_wifiConnection"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_wifiConnection"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btn_wifiConnection"
+        app:layout_constraintVertical_bias="0.51" />
+
+</android.support.constraint.ConstraintLayout>
