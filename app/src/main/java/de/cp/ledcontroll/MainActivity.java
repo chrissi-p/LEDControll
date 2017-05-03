@@ -1,6 +1,8 @@
 package de.cp.ledcontroll;
 
 import android.content.Context;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -18,12 +20,22 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import java.net.InetAddress;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static WifiManager wifiManager = null;
     private static TextView tv_wifiState = null;
     private static TextView tv_wifiConnection = null;
+
+    private NsdManager mNsdManager;
+    private NsdManager.DiscoveryListener mDiscoveryListener;
+    private NsdManager.ResolveListener mResolveListener;
+    private NsdServiceInfo mServiceInfo;
+    public String mArduAddress;
+
+    private static final String SERVICE_TYPE = "_http._tcp";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +47,11 @@ public class MainActivity extends AppCompatActivity
         tv_wifiState = (TextView) findViewById(R.id.tv_wifiState);
         tv_wifiConnection = (TextView) findViewById(R.id.tv_wifiConnection);
 
+        mArduAddress = "";
+        mNsdManager = (NsdManager) (getApplicationContext().getSystemService(Context.NSD_SERVICE));
+        initializeResolveListener();
+        initializeDiscoveryListener();
+        mNsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
     }
 
     private void initInterface() {
@@ -70,13 +87,13 @@ public class MainActivity extends AppCompatActivity
      */
     public static void testWifiState() {
         int wifiState = wifiManager.getWifiState();
-        SupplicantState wifiIfno = wifiManager.getConnectionInfo().getSupplicantState();
-        Log.d("Wifi:testWifiState", "wifiState: " + wifiIfno.toString());
+        SupplicantState wifiInfo = wifiManager.getConnectionInfo().getSupplicantState();
+        Log.d("Wifi:testWifiState", "wifiState: " + wifiInfo.toString());
         tv_wifiState.setText(String.valueOf(wifiState));
 
-        if (wifiState == wifiManager.WIFI_STATE_ENABLED) {
+        if (wifiState == WifiManager.WIFI_STATE_ENABLED) {
             tv_wifiState.append(" Wifi enabled");
-            if (wifiIfno.equals(SupplicantState.COMPLETED)) {
+            if (wifiInfo.equals(SupplicantState.COMPLETED)) {
                 Log.d("Wifi:testWifiState", "connected to Supplicant");
                 tv_wifiConnection.setText("Wlan verbunden");
             } else {
@@ -144,4 +161,75 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+
+    private void initializeDiscoveryListener() {
+
+        // Instantiate a new DiscoveryListener
+        mDiscoveryListener = new NsdManager.DiscoveryListener() {
+
+            //  Called as soon as service discovery begins.
+            @Override
+            public void onDiscoveryStarted(String regType) {
+            }
+
+            @Override
+            public void onServiceFound(NsdServiceInfo service) {
+                // A service was found!  Do something with it.
+                String name = service.getServiceName();
+                String type = service.getServiceType();
+                Log.d("NSD", "Service Name=" + name);
+                Log.d("NSD", "Service Type=" + type);
+                if (type.equals(SERVICE_TYPE) && name.contains("garagedoor")) {
+                    Log.d("NSD", "Service Found @ '" + name + "'");
+                    mNsdManager.resolveService(service, mResolveListener);
+                }
+            }
+
+            @Override
+            public void onServiceLost(NsdServiceInfo service) {
+                // When the network service is no longer available.
+                // Internal bookkeeping code goes here.
+            }
+
+            @Override
+            public void onDiscoveryStopped(String serviceType) {
+            }
+
+            @Override
+            public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+                mNsdManager.stopServiceDiscovery(this);
+            }
+
+            @Override
+            public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+                mNsdManager.stopServiceDiscovery(this);
+            }
+        };
+    }
+
+    private void initializeResolveListener() {
+        mResolveListener = new NsdManager.ResolveListener() {
+
+            @Override
+            public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                // Called when the resolve fails.  Use the error code to debug.
+                Log.e("NSD", "Resolve failed" + errorCode);
+            }
+
+            @Override
+            public void onServiceResolved(NsdServiceInfo serviceInfo) {
+                mServiceInfo = serviceInfo;
+
+                // Port is being returned as 9. Not needed.
+                //int port = mServiceInfo.getPort();
+
+                InetAddress host = mServiceInfo.getHost();
+                String address = host.getHostAddress();
+                Log.d("NSD", "Resolved address = " + address);
+                mArduAddress = address;
+            }
+        };
+    }
+
 }
