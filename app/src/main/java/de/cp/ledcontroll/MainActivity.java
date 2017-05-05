@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity
     private NsdServiceInfo mServiceInfo;
     public String mArduAddress;
 
-    private static final String SERVICE_TYPE = "_http._tcp";
+    private static final String SERVICE_TYPE = "_http._tcp.";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity
                 String type = service.getServiceType();
                 Log.d("NSD", "Service Name=" + name);
                 Log.d("NSD", "Service Type=" + type);
-                if (type.equals(SERVICE_TYPE) && name.contains("garagedoor")) {
+                if (type.equals(SERVICE_TYPE) && name.contains("esp")) {
                     Log.d("NSD", "Service Found @ '" + name + "'");
                     mNsdManager.resolveService(service, mResolveListener);
                 }
@@ -222,11 +222,11 @@ public class MainActivity extends AppCompatActivity
                 mServiceInfo = serviceInfo;
 
                 // Port is being returned as 9. Not needed.
-                //int port = mServiceInfo.getPort();
+                int port = mServiceInfo.getPort();
 
                 InetAddress host = mServiceInfo.getHost();
                 String address = host.getHostAddress();
-                Log.d("NSD", "Resolved address = " + address);
+                Log.d("NSD", "Resolved address = " + address + ":" + port);
                 mArduAddress = address;
             }
         };
